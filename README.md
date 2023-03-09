@@ -1,7 +1,5 @@
 # Train_Whisper
 
-# Train_Whisper
-
 ## Introduction 
 Train Whisper for your languages!!!
 
@@ -41,7 +39,12 @@ You can configure hyperparameters with the following flags
 --num_train_epochs': number of epochs\
 --weight_decay: weight_decay \
 --learning_rate: learning rate
---train_fraction: number of trainig samples to use per class
---batch_size: batch size
---num_workers_percentage: percentage of number of workers to use for dataloaders (reduce if memory error)
+--train_fraction: number of trainig samples to use per class \
+--batch_size: batch size \
+--num_workers_percentage: percentage of number of workers to use for dataloaders (reduce if memory error) \
 --ga: Number of gradient accumulation steps
+
+## Fair warning
+
+You will probably have to implement your own dataloaders, and a lot more. But the scripts might help get the process quicker
+
