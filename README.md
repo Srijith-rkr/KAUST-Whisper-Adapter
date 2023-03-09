@@ -36,8 +36,8 @@ python FineTuneWhisper.py
 ```
 You can configure hyperparameters with the following flags
 
---project_name: wandb project_name
-'--run_name: wandb run_name
+--project_name: wandb project_name \\
+'--run_name: wandb run_name //
 --num_train_epochs': number of epochs
 --weight_decay: weight_decay
 --learning_rate: learning rate
