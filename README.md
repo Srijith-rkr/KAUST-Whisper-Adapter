@@ -46,5 +46,5 @@ You can configure hyperparameters with the following flags
 
 ## Fair warning
 
-You will probably have to implement your own dataloaders, and a lot more. But the scripts might help get the process quicker
+You will probably have to implement your own dataloaders, and a lot more. But the scripts might help go through the process quicker
 
