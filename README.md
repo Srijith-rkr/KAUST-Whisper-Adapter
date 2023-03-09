@@ -5,5 +5,5 @@ This repo contains the following functionality built on top of the Pytorch imple
 
 * Add new language to the Whisper model and train with multiple GPUs for language/dialect identification
 * Plot your network architecture
-* Visualize what parts of the input Whisper focuses on make predictions (perturbation bases neural saliency method)
+* Visualize what parts of the input Whisper focuses on make predictions (perturbation bases neural saliency method) - https://github.com/ajsanjoaquin/mPerturb
 * Additional comments to understand the code better.
