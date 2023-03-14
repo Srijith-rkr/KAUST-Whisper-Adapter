@@ -9,6 +9,7 @@ This repo contains the following functionality built on top of the Pytorch imple
 * Plot your network architecture
 * Visualize what parts of the input Whisper focuses on make predictions (perturbation bases neural saliency method) - https://github.com/ajsanjoaquin/mPerturb
 * Additional comments to understand the code better.
+* Parameter Efficient Learning (PEL) methods to train Whisper (Adapter and Neural Reprogramming)
 
 ## How to set up your environment
 Use the .yaml file with conda to load your environment. 
@@ -47,4 +48,21 @@ You can configure hyperparameters with the following flags
 ## Fair warning
 
 You will probably have to implement your own dataloaders, and a lot more. But the scripts might help go through the process quicker
+
+# Reprogrammed whisper
+The PEL methods for whisper are implemented by modifying methods the 'whisper' module in 'reprogrammed_whisper' \ 
+Hence, please use 
+```
+import reprogrammed_whisper
+```
+The two PEL methods implemented are: 
+##1 Adapters [Paper](https://proceedings.mlr.press/v97/houlsby19a.html)
+Adapters are small trainable blocks inserted between the layers of a transformer architecture. They down-project the latent dimension from the previous layer and apply a nonlinear activation function, followed by an up-projection. A residual connection surrounds the adapter layer. This setup encourages parameter sharing between the frozen components and localizes all the weight updates to the adapter modules as shown in the following figure. 
+
+![Illustration of the transformer architecture embedded with adapter layers](https://github.com/Srijith-rkr/Train_Whisper/blob/main/Adapter_img.PNG)
+
+##2 Neural Reprogramming [Paper](https://arxiv.org/pdf/2106.09296.pdf)
+Neural reprogramming can be used to repurpose a frozen pre-trained model to out-of-domain prediction tasks by adding trainable parameters to the input of the pre-trained model. The frozen model is followed by a label-mapping strategy to map the source labels to the outof-domain target labels. The trainable input noise aligns the latent distribution of the target domain with being more similar to that of the source domain, using the pre-existing decision boundaries of the frozen model. Neural reprogramming works well when the input size of the target data is comparably smaller than the source data.
+
+
 
