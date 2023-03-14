@@ -88,7 +88,7 @@ model = whisper.load_model("base",adapter=True, adapter_dims = 64)
     custom : bool
         specifies weather you want the custom model with the added languages. (alters the final token_embedding layer accordingly)
         Use num_dialects to specify how many dialects you will be adding and specify the dialects in tokenizer.py
-        if specified, returns checkpoint and un-initiliazed model./
+        if specified, returns checkpoint and un-initiliazed model.
         Set custom = False, if you want to use the reprogrammed model.
         
     adapter : bool
