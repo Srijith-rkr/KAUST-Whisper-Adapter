@@ -56,13 +56,55 @@ Hence, please use
 import reprogrammed_whisper
 ```
 The two PEL methods implemented are: 
-##1 Adapters [Paper](https://proceedings.mlr.press/v97/houlsby19a.html)
+## 1 Adapters [Paper](https://proceedings.mlr.press/v97/houlsby19a.html)
 Adapters are small trainable blocks inserted between the layers of a transformer architecture. They down-project the latent dimension from the previous layer and apply a nonlinear activation function, followed by an up-projection. A residual connection surrounds the adapter layer. This setup encourages parameter sharing between the frozen components and localizes all the weight updates to the adapter modules as shown in the following figure. 
 
 ![Illustration of the transformer architecture embedded with adapter layers](https://github.com/Srijith-rkr/Train_Whisper/blob/main/Adapter_img.PNG)
 
-##2 Neural Reprogramming [Paper](https://arxiv.org/pdf/2106.09296.pdf)
+## 2 Neural Reprogramming [Paper](https://arxiv.org/pdf/2106.09296.pdf)
 Neural reprogramming can be used to repurpose a frozen pre-trained model to out-of-domain prediction tasks by adding trainable parameters to the input of the pre-trained model. The frozen model is followed by a label-mapping strategy to map the source labels to the outof-domain target labels. The trainable input noise aligns the latent distribution of the target domain with being more similar to that of the source domain, using the pre-existing decision boundaries of the frozen model. Neural reprogramming works well when the input size of the target data is comparably smaller than the source data.
+
+In our implementation we add input noise to the input of the model (Log-Mel Spectrogram of a 30s audio clip), and implement a hard label mapping strategy to map the source labels to target domain. /
+/
+You can access the PEL methods using the load_model() methods in __init__.py as follows
+```
+model = whisper.load_model("base",adapter=True, adapter_dims = 64)
+    """
+    Load a Whisper ASR model with reprogramming features
+
+    Parameters
+    ----------
+    name : str
+        one of the official model names listed by `whisper.available_models()`, or
+        path to a model checkpoint containing the model dimensions and the model state_dict.
+    device : Union[str, torch.device]
+        the PyTorch device to put the model into
+    download_root: str
+        path to download the model files; by default, it uses "~/.cache/whisper"
+    in_memory: bool
+        whether to preload the model weights into host memory
+        
+    Added parameters :
+    custom : bool
+        specifies weather you want the custom model with the added languages. (alters the final token_embedding layer accordingly)
+        Use num_dialects to specify how many dialects you will be adding and specify the dialects in tokenizer.py
+        if specified, returns checkpoint and un-initiliazed model./
+        Set custom = False, if you want to use the reprogrammed model.
+        
+    adapter : bool
+      specifies weather you want to add adapters to the model
+
+    adapter :  int = 256
+      specifies the adapter dimensions. (Default is 256)
+      
+      
+
+    Returns
+    -------
+    model : Whisper
+        The Whisper ASR model instance
+    """
+```
 
 
 
