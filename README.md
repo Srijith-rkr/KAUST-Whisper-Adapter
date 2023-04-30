@@ -18,11 +18,11 @@ Use Whisper.yaml for training and perturb.yaml for neural saliency methods
 ## How to add new languages. 
 
 update the following parameters in the load model method to add your custom  languages to Whisper
-
+```
 model = whisper.load_model("base", custom = True, num_dialects = 3)
-
-set custom to True if you want to add your own languages/dialects
-set num_dialects to the number of languages/dialects you would like to add
+```
+set custom to True if you want to add your own languages/dialects \
+set num_dialects to the number of languages/dialects you would like to add \
 And update the dialects list on whisper/tokenizer.py with your new languages. 
 
 The code has been configured to add the new inputs to the tokenizer and enable the model to predict the new dialects. 
