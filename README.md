@@ -39,6 +39,7 @@ python FineTuneWhisper.py
 ```
 You can configure hyperparameters with the following flags
 
+```shell
 --project_name: wandb project_name \
 '--run_name: wandb run_name \
 --num_train_epochs': number of epochs\
@@ -48,6 +49,7 @@ You can configure hyperparameters with the following flags
 --batch_size: batch size \
 --num_workers_percentage: percentage of number of workers to use for dataloaders (reduce if memory error) \
 --ga: Number of gradient accumulation steps
+```
 
 ## Fair warning
 
