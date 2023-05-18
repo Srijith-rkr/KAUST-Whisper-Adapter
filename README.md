@@ -106,5 +106,16 @@ model = whisper.load_model("base",adapter=True, adapter_dims = 64)
     """
 ```
 
+### Reference
 
+If you consider this work may be useful for your research, please consider to cite this paper.
+
+```bib
+@inproceedings{radhakrishnan2023parameter,
+  title={A Parameter-Efficient Learning Approach to Arabic Dialect Identification with Pre-Trained General-Purpose Speech Model},
+  author={Srijith Radhakrishnan, Chao-Han Huck Yang, Sumeer Ahmad Khan, Narsis A. Kiani, David Gomez-Cabrero, Jesper N. Tegner},
+  booktitle={INTERSPEECH},
+  year={2023}
+}
+```
 
