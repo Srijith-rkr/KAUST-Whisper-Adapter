@@ -1,7 +1,7 @@
-# Train_Whisper
+# Fine-tune OpenAI Whisper using Residual Adapters in Pytorch
 
 ## Introduction 
-Train Whisper for your languages!!!
+Train Whisper for your languages and own purpose!
 
 This repo contains the following functionality built on top of the Pytorch implementation of Whisper from OpenAI - https://github.com/openai/whisper
 
