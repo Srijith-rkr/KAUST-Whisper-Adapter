@@ -1,6 +1,8 @@
 # Fine-tune OpenAI Whisper using Residual Adapters in Pytorch
 
-- Accepted to Interspeech 2023. ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+
+- Accepted to Interspeech 2023. 
 
 ## Introduction 
 Train Whisper for your languages and own purpose!
