@@ -112,7 +112,7 @@ model = whisper.load_model("base",adapter=True, adapter_dims = 64)
 
 ### Reference
 
-If you consider this work may be useful for your research, please consider to cite this paper. Thank you!
+If you consider this work would be related or useful for your research, please consider to cite this paper. Thank you!
 
 ```bib
 @inproceedings{radhakrishnan2023parameter,
