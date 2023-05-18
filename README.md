@@ -62,7 +62,7 @@ The two PEL methods implemented are:
 - Adapters are small trainable blocks inserted between the layers of a transformer architecture. 
 - This setup encourages parameter sharing between the frozen components and localizes all the weight updates to the adapter modules as shown in the following figure. 
 
-![Illustration of the transformer architecture embedded with adapter layers](https://github.com/Srijith-rkr/Train_Whisper/blob/main/Adapter_img.PNG)
+<img src="https://github.com/Srijith-rkr/Train_Whisper/blob/main/Adapter_img.PNG" width="500">
 
 ## 2 Neural Reprogramming [Paper](https://arxiv.org/pdf/2106.09296.pdf)
 - Neural reprogramming can be used to repurpose a frozen pre-trained model to out-of-domain prediction tasks by adding trainable parameters to the input of the pre-trained model. 
