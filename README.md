@@ -59,8 +59,7 @@ import reprogrammed_whisper
 ```
 The two PEL methods implemented are: 
 ## 1 Residual Adapters [Paper](https://proceedings.mlr.press/v97/houlsby19a.html)
-- Adapters are small trainable blocks inserted between the layers of a transformer architecture. T
-- hey down-project the latent dimension from the previous layer and apply a nonlinear activation function, followed by an up-projection. A residual connection surrounds the adapter layer. 
+- Adapters are small trainable blocks inserted between the layers of a transformer architecture. 
 - This setup encourages parameter sharing between the frozen components and localizes all the weight updates to the adapter modules as shown in the following figure. 
 
 ![Illustration of the transformer architecture embedded with adapter layers](https://github.com/Srijith-rkr/Train_Whisper/blob/main/Adapter_img.PNG)
@@ -68,7 +67,6 @@ The two PEL methods implemented are:
 ## 2 Neural Reprogramming [Paper](https://arxiv.org/pdf/2106.09296.pdf)
 - Neural reprogramming can be used to repurpose a frozen pre-trained model to out-of-domain prediction tasks by adding trainable parameters to the input of the pre-trained model. 
 - The frozen model is followed by a label-mapping strategy to map the source labels to the outof-domain target labels.
-- Neural reprogramming works well when the input size of the target data is comparably smaller than the source data.
 
 In our implementation we add input noise to the input of the model (Log-Mel Spectrogram of a 30s audio clip), and implement a hard label mapping strategy to map the source labels to target domain. /
 /
