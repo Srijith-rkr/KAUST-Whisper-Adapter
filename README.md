@@ -1,5 +1,7 @@
 # Fine-tune OpenAI Whisper using Residual Adapters in Pytorch
 
+- Accepted to Interspeech 2023
+
 ## Introduction 
 Train Whisper for your languages and own purpose!
 
