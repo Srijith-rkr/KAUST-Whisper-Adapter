@@ -4,7 +4,7 @@
 
 - Accepted to Interspeech 2023. 
 
-<img src="https://github.com/Srijith-rkr/Train_Whisper/blob/main/System.PNG" width="500">
+<img src="https://github.com/Srijith-rkr/KAUST-Whisper-Adapter/blob/main/System.png" width="500">
 
 
 ## Introduction 
