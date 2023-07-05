@@ -1,6 +1,6 @@
 # Fine-tune OpenAI Whisper using Residual Adapters in Pytorch
 
-![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white) | [Paper](https://arxiv.org/abs/2305.11244)
+![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white) | [Paper](https://arxiv.org/abs/2305.11244) | [Arabic Speech Example](https://drive.google.com/file/d/1NN8S3sJ6_oloX5wU_win8D43H9YybzFz/view?usp=sharing)
 
 - Accepted to Interspeech 2023. 
 
