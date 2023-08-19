@@ -86,8 +86,12 @@ class MultiHeadAttention(nn.Module):
         xa: Optional[Tensor] = None,
         mask: Optional[Tensor] = None,
         kv_cache: Optional[dict] = None,
+        q_prev:  Optional[Tensor] = None,
     ):
-        q = self.query(x)
+        if q_prev:
+            q = q_prev
+        else:
+            q = self.query(x)
 
         if kv_cache is None or xa is None or self.key not in kv_cache:
             # hooks, if installed (i.e. kv_cache is not None), will prepend the cached kv tensors;
@@ -99,8 +103,8 @@ class MultiHeadAttention(nn.Module):
             k = kv_cache[self.key]
             v = kv_cache[self.value]
 
-        wv, qk = self.qkv_attention(q, k, v, mask)
-        return self.out(wv), qk
+        wv, qk, q = self.qkv_attention(q, k, v, mask)
+        return self.out(wv), qk, q
 
     def qkv_attention(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
         n_batch, n_ctx, n_state = q.shape
@@ -115,16 +119,17 @@ class MultiHeadAttention(nn.Module):
         qk = qk.float()
 
         w = F.softmax(qk, dim=-1).to(q.dtype)
-        return (w @ v).permute(0, 2, 1, 3).flatten(start_dim=2), qk.detach()
+        return (w @ v).permute(0, 2, 1, 3).flatten(start_dim=2), qk.detach(), q
 
 
 class ResidualAttentionBlock(nn.Module):
-    def __init__(self, n_state: int, n_head: int, cross_attention: bool = False, add_adapter: bool = False, adapter_dim: int = 256, add_bridge: bool = False, layer_num: int = 0 ):
+    def __init__(self, n_state: int, n_head: int, cross_attention: bool = False, add_adapter: bool = False, adapter_dim: int = 256, add_transformer_adapter: bool = False, layer_num: int = 0):
         super().__init__()
         
-        if add_bridge and (not add_adapter):
-            print("cannot have briges without adapter")
-            return
+        self.add_adapter = add_adapter
+        self.add_transformer_adapter = add_transformer_adapter
+        self.adadpter_dim = adapter_dim
+        self.n_state = n_state
         
         self.attn = MultiHeadAttention(n_state, n_head)
         self.attn_ln = LayerNorm(n_state)
@@ -132,92 +137,52 @@ class ResidualAttentionBlock(nn.Module):
         self.cross_attn = MultiHeadAttention(n_state, n_head) if cross_attention else None
         self.cross_attn_ln = LayerNorm(n_state) if cross_attention else None
 
-        n_mlp = n_state * 4
-        self.mlp = nn.Sequential(Linear(n_state, n_mlp), nn.GELU(), Linear(n_mlp, n_state))  #torch.nn.Linear(in_features, out_features, bias=True,
+        self.mlp = nn.Sequential(Linear(n_state, n_state * 4), nn.GELU(), Linear(n_state * 4, n_state))
         self.mlp_ln = LayerNorm(n_state)
         
-        self.add_adapter = add_adapter
-        self.add_bridge = add_bridge
-        self.layer_num = layer_num
-#        self.temp = torch.zeros(size= [1, 1500, 512], requires_grad=False) # HARDCODED VALUES BE CAREFUL
-                
+        if self.add_transformer_adapter:
+            self.adapter_wte = nn.Embedding(adapter_dim, n_state)
+            
         if self.add_adapter:
-            # self.adapter_conv_on_cat = nn.Sequential( Conv1d(n_state*(self.layer_num+1), n_state, kernel_size=1, padding=0), nn.GELU())
-            # self.adapter_conv_on_cat_ln =LayerNorm(n_state* (self.layer_num+1) )
-            # self.adapter = nn.Sequential(Linear(n_state, adapter_dim), nn.GELU(), Linear(adapter_dim, n_state))
-            # self.adapter_ln = LayerNorm(n_state)
-            #self.prev_rep_X_ln = LayerNorm(n_state)
-
-          #  self.adapter_ln_ds = LayerNorm(n_state)       
-           # self.adapter_ln_us = LayerNorm(adapter_dim)    
             self.adapter_ln_attn = LayerNorm(adapter_dim)
             self.adapter_ds = Linear(n_state, adapter_dim)
-            self.adapter_attn = MultiHeadAttention(adapter_dim, n_head) 
             self.adapter_gelu = nn.GELU()
             self.adapter_us = Linear(adapter_dim, n_state)
-
-            
-
     def forward(
         self,
         x: Tensor,
         xa: Optional[Tensor] = None,
         mask: Optional[Tensor] = None,
         kv_cache: Optional[dict] = None,
-#        prev_rep_X: Optional[Tensor] = None,
-       # tensor_List: list = [] ,
     ):
-        x = x + self.attn(self.attn_ln(x), mask=mask, kv_cache=kv_cache)[0]
+        op, _, q = self.attn(self.attn_ln(x), mask=mask, kv_cache=kv_cache)[0]
+        x = x + op
         if self.cross_attn:
-            x = x + self.cross_attn(self.cross_attn_ln(x), xa, kv_cache=kv_cache)[0]
-            
-            
+            op, _, _ = self.cross_attn(self.cross_attn_ln(x), xa, kv_cache=kv_cache)[0]
+            x = x + op
         x = x + self.mlp(self.mlp_ln(x))
-        
-        # if self.add_bridge: 
-        #     # temp = torch.zeros(size= x.shape, requires_grad=False).to(x.dtype).to(x.device)
-        #     # for i in tensor_List:
-        #     #     temp = temp + i
-        #     if self.layer_num == 0 : x_ = x
-        #     else :
-        #         x_  = torch.cat(     (torch.cat(tensor_List,2),x),2 )
-            
-        #     x_ = self.adapter_conv_on_cat_ln(x_)
-        #     x_ = x_.permute(0, 2, 1)
-        #     x_ = self.adapter_conv_on_cat(x_)
-        #     x_ = x_.permute(0, 2, 1)
-            
-        #     x = x + x_
-            
-        #     rep_X =  self.adapter( self.adapter_ln(x))       #was self.adapter( self.adapter_ln(x+ prev_rep_X)) + prev_rep_X  #was  self.adapter( self.adapter_ln(x)) + prev_rep_X   #was   self.adapter( self.adapter_ln(x + prev_rep_X)  )              #was self.adapter( self.adapter_ln(x) + self.prev_rep_X_ln(prev_rep_X ) ) where self.prev_rep_X_ln was non -trainable
-        #     tensor_List.append(rep_X)
-            
-        #     x = x + rep_X
-            
-        #     return x , tensor_List
             
         if self.add_adapter: 
-            x_ds =  self.adapter_ds((x))
-            x_transform = self.adapter_attn(self.adapter_ln_attn(     x_ds          ))[0]
-            x_ds = x_ds + x_transform
-            x1 = self.adapter_gelu(x_ds)     
-            x = x + self.adapter_us(x1)
-
-           # x = x + self.adapter_us(    self.adapter_ln_us(self.adapter_attn(self.adapter_ln_attn(self.adapter_ds(self.adapter_ln_ds(x))))[0])     )
+            x_down =  self.adapter_ds((x))
+            x_gelu = self.adapter_gelu(x_ds)     
+            x_up = self.adapter_us(x_gelu)
+            x = x + x_up
             
-        return x  # return has been placed outside for the decoder
-
-            
-        
+        if self.add_transformer_adapter and not self.cross_attn : # Not activated for the decoder
+            prefix = self.adapter_wte.weight.reshape(1, self.adadpter_dim, self.n_state).repeat(x.shape[0], 1, 1, 1)
+            x_adapter_attn  =self.self.attn(prefix, q_prev = q)
+            x = x + x_adapter_attn
+        return x
 
 
 class AudioEncoder(nn.Module):
-    def __init__(self, n_mels: int, n_ctx: int, n_state: int, n_head: int, n_layer: int,add_adapter: bool = False, adapter_dim: int = 256, add_bridge: bool = False):
+    def __init__(self, n_mels: int, n_ctx: int, n_state: int, n_head: int, n_layer: int,add_adapter: bool = False, adapter_dim: int = 256, add_bridge: bool = False, add_transformer_adapter: bool = False):
         super().__init__()
         
         self.add_adapter = add_adapter
         self.adapter_dim = adapter_dim
         self.add_bridge = add_bridge
+        self.add_transformer_adapter = add_transformer_adapter
         
         self.noise_matrix = nn.Parameter(  torch.normal(size = [80, 3000], mean=0.35, std=0.35),   requires_grad=True) # you handel the dtype insided the forward pass
         self.conv1 = Conv1d(n_mels, n_state, kernel_size=3, padding=1) # torch.nn.Conv1d(in_channels, out_channels) convers from 80 channesl (from mel spectogram) to 512 channelsl (given by n_audio_state)
@@ -227,7 +192,7 @@ class AudioEncoder(nn.Module):
         
 
         self.blocks: Iterable[ResidualAttentionBlock] = nn.ModuleList(
-            [ResidualAttentionBlock(n_state, n_head, add_adapter=self.add_adapter, adapter_dim=self.adapter_dim, add_bridge=self.add_bridge, layer_num= i) for i in range(n_layer)] # notice that cross attention in RAB is false in encoder but true in decoder 
+            [ResidualAttentionBlock(n_state, n_head, add_adapter=self.add_adapter, adapter_dim=self.adapter_dim, layer_num= i, add_transformer_adapter = self.add_transformer_adapter) for i in range(n_layer)] # notice that cross attention in RAB is false in encoder but true in decoder 
         )
         self.ln_post = LayerNorm(n_state)
 
@@ -303,12 +268,13 @@ class TextDecoder(nn.Module):
 
 
 class Whisper(nn.Module):
-    def __init__(self, dims: ModelDimensions, add_adapter: bool = False,adapter_dim: int = 256, add_bridge: bool = False): #ModelDimensions is a dataclass that contains all the needed parameters as objects
+    def __init__(self, dims: ModelDimensions, add_adapter: bool = False,adapter_dim: int = 256, add_bridge: bool = False, add_transformer_adapter: bool = False): #ModelDimensions is a dataclass that contains all the needed parameters as objects
         super().__init__()
         self.dims = dims
         self.add_adapter = add_adapter
         self.adapter_dim = adapter_dim
         self.add_bridge = add_bridge
+        self.add_transformer_adapter = add_transformer_adapter
         
         self.encoder = AudioEncoder(
             self.dims.n_mels,
@@ -318,7 +284,8 @@ class Whisper(nn.Module):
             self.dims.n_audio_layer,
             add_adapter=self.add_adapter,
             adapter_dim=self.adapter_dim,
-            add_bridge=self.add_bridge
+            add_bridge=self.add_bridge,
+            add_transformer_adapter = self.add_transformer_adapter
         )
         self.decoder = TextDecoder(
             self.dims.n_vocab,
