@@ -71,7 +71,7 @@ def available_models() -> List[str]:
     return list(_MODELS.keys())
 
 
-def load_model(name: str, device: Optional[Union[str, torch.device]] = None, download_root: str = None, in_memory: bool = False, custom: bool = False, adapter: bool = False, adapter_dims: int = 256, bridge: bool = False, num_dialects = 3) -> Whisper:
+def load_model(name: str, device: Optional[Union[str, torch.device]] = None, download_root: str = None, in_memory: bool = False, custom: bool = False, adapter: bool = False, adapter_dims: int = 256, bridge: bool = False, num_dialects = 3, add_transformer_adapter: bool = False) -> Whisper:
     """
     Load a Whisper ASR model
 
@@ -134,12 +134,10 @@ def load_model(name: str, device: Optional[Union[str, torch.device]] = None, dow
         
     else:
         dims = ModelDimensions(**checkpoint["dims"])
-        model = Whisper(dims, add_adapter=adapter, adapter_dim=adapter_dims, add_bridge=bridge)
+        model = Whisper(dims, add_adapter=adapter, adapter_dim=adapter_dims, add_bridge=bridge, add_transformer_adapter = add_transformer_adapter)
         model.load_state_dict(checkpoint["model_state_dict"],strict = False) # made strict = False as I added noise matrix
         return model.to(device) 
     
     # when you are creating a new model now (and you want to use the old models weights on some point) we can use
     # model.load_state_dict with the strict parameter set to false. For more infromation go to the
     # https://pytorch.org/tutorials/beginner/saving_loading_models.html#warmstarting-model-using-parameters-from-a-different-model
-    
-    
